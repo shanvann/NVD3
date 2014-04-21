@@ -1,96 +1,43 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
-<style>
-
-body {
-  overflow-y:scroll;
-}
-
-</style>
-<body>
-
-<svg id="test1"></svg>
-
 <script src="../lib/d3.v3.js"></script>
 <script src="../nv.d3.js"></script>
 <script src="../src/models/legend.js"></script>
 <script src="../src/models/line.js"></script>
 <script src="../src/utils.js"></script>
-<script>
+<link href="../src/nv.d3.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+<script type="text/javascript">
+  //This event is called when the DOM is fully loaded
+  window.addEvent("domready",function(){
+    //Creating a new AJAX request that will request 'test.csv' from the current directory
+    var csvRequest = new Request({
+      url:"../../rateAdaptationData/rawData/attn_sweep_2014-04-16_rx18_C_MBRd8f5359b54_80b0459a2_debug13_80211.csv",
+      onSuccess:function(response){
+        //The response text is available in the 'response' variable
+        //Set the value of the textarea with the id 'csvResponse' to the response
+        $("csvResponse").value = response;
+      }
+    }).send(); //Don't forget to send our request!
+  });
+</script>
 
-
-
-//Format A
-nv.addGraph({
-  generate: function() {
-    var width = nv.utils.windowSize().width - 40,
-        height = nv.utils.windowSize().height - 40;
-
-    var chart = nv.models.line()
-                .width(width)
-                .height(height)
-                .margin({top: 20, right: 20, bottom: 20, left: 20})
-
-
-    d3.select('#test1')
-      .attr('width', width)
-      .attr('height', height)
-      .datum(sinAndCos())
-      .call(chart);
-
-    return chart;
-  },
-  callback: function(graph) {
-    window.onresize = function() {
-      var width = nv.utils.windowSize().width - 40,
-          height = nv.utils.windowSize().height - 40,
-          margin = graph.margin();
-
-
-      if (width < margin.left + margin.right + 20)
-        width = margin.left + margin.right + 20;
-
-      if (height < margin.top + margin.bottom + 20)
-        height = margin.top + margin.bottom + 20;
-
-
-      graph
-         .width(width)
-         .height(height);
-
-      d3.select('#test1')
-        .attr('width', width)
-        .attr('height', height)
-        .call(graph);
-    };
-  }
-});
-
-
-
-function sinAndCos() {
-  var sin = [],
-      cos = [];
-
-  for (var i = 0; i < 100; i++) {
-    sin.push({x: i, y: Math.sin(i/10)});
-    cos.push({x: i, y: .5 * Math.cos(i/10)});
-  }
-
-  return [
-    {
-      values: sin,
-      key: "Sine Wave",
-      color: "#ff7f0e"
-    },
-    {
-      values: cos,
-      key: "Cosine Wave",
-      color: "#2ca02c"
-    }
-  ];
+<style>
+body {
+  overflow-y:scroll;
 }
-
+</style>
+<body>
+<!--<textarea rows="5" cols="25" id="csvResponse"></textarea>-->
+<fieldset>
+  <label for="csvFileInput"> <strong>CSV File:</strong>
+    </label>
+      <input type="file" id="csvFileInput" onchange="handleFiles(this.files)" accept=".csv">
+</fieldset>
+<div id='chart'>
+  <svg style='height:500px'> </svg>
+</div>
+<script src='line_sample.js' type='text/javascript'> </script>
+<script>
 
 </script>
