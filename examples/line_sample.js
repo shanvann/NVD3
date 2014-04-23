@@ -2,51 +2,45 @@
 var fileName = "attn_sweep_2014-04-16_rx18_C_MBRd8f5359b54_80b0459a2_debug13_80211.csv" 
 var promise = getParseCSVdata(fileName);
 var x_axis_label = 'Time (ms)';
+var y_axis_label = 'Rate (mbps)';
 var tered = getPlotData(promise,x_axis_label);
 
 function getPlotData(promise,x_axis_label){
-promise.success(function (data) {
-	var output_json = csvjson.csv2json(data, {delim: ",",textdelim: "\""});
-	plotData = dataToPlot(output_json);
-//<script src='readFileAsCsv.js' type='text/javascript'> </script>
-/*These lines are all chart setup.  Pick and choose which chart features you want to utilize. */
-nv.addGraph(function() {
-  var chart = nv.models.multiChart()
+  promise.success(function (data) {
+    var output_json = csvjson.csv2json(data, {delim: ",",textdelim: "\""});
+    plotData = dataToPlot(output_json,"times","tot_rx_bw");
+    var chart1 = NVlineChart(plotData,x_axis_label,y_axis_label);
+  });
+}
+
+function NVlineChart(plotData,x_axis_label,y_axis_label){
+  nv.addGraph(function() {
+    var chart = nv.models.lineChart()
                 .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
                 .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                 .transitionDuration(350)  //how fast do you want the lines to transition?
                 .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                 .showYAxis(true)        //Show the y-axis
                 .showXAxis(true)        //Show the x-axis
-  ;
+    ;
 
-  chart.xAxis     //Chart x-axis settings
+    chart.xAxis     //Chart x-axis settings
       .axisLabel(x_axis_label)
       .tickFormat(d3.format(',r'));
   
-  chart.yAxis1
-        .tickFormat(d3.format(',.1f'));
+    chart.yAxis     //Chart y-axis settings
+      .axisLabel('Rate (mbps)')
+      .tickFormat(d3.format('.f'));
 
-  chart.yAxis2
-        .tickFormat(d3.format(',.1f'));
-
-  //chart.yAxis     //Chart y-axis settings
-  //    .axisLabel('Rate (mbps)')
-  //    .tickFormat(d3.format('.02f'));
-
-  /* Done setting the chart up? Time to render it!*/
-  alert(JSON.stringify(plotData));
-  var myData = plotData;   //You need data...
-
-  d3.select('#chart svg')    //Select the <svg> element you want to render the chart in.   
-      .datum(myData)         //Populate the <svg> element with chart data...
+    /* Done setting the chart up? Time to render it!*/
+    d3.select('#chart svg')    //Select the <svg> element you want to render the chart in.   
+      .datum(plotData)         //Populate the <svg> element with chart data...
       .call(chart);          //Finally, render the chart!
 
-  //Update the chart when window resizes.
-  nv.utils.windowResize(function() { chart.update() });
-  return chart;
-});
-});
+    //Update the chart when window resizes.
+    nv.utils.windowResize(function() { chart.update() });
+    return chart;
+  });
 }
 /**************************************
  * Simple test data generator
@@ -90,25 +84,15 @@ function getParseCSVdata(fileName){
   	});	
 }
 
-function dataToPlot(output_json){
-	var result1 = [], result2 = [];
+function dataToPlot(output_json,x_axis,y_axis){
+	var result = [];
 	for (var i = 0; i < output_json.rows.length; i++) {
-    result1.push({x: output_json.rows[i]["times"], y: output_json.rows[i].tot_rx_bw});
-    result2.push({x: output_json.rows[i]["times"], y: output_json.rows[i]["attn1"]});
+    result.push({x: output_json.rows[i][x_axis], y: output_json.rows[i][y_axis]});
 	}
-
-	return [
-    {
-      values: result1,      //values - represents the array of {x,y} data points
+	return [{
+      values: result,      //values - represents the array of {x,y} data points
       key: 'Sine1 Wave', //key  - the name of the series.
       color: '#ff7f0e',  //color - optional: choose your own line color.
       area: false
-    },
-    {
-      values: result2,      //values - represents the array of {x,y} data points
-      key: 'Sine2 Wave', //key  - the name of the series.
-      color: '#ff7f0e',  //color - optional: choose your own line color.
-      area: false
-    }
-    ];
+    }];
 }
